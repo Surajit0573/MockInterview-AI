@@ -46,9 +46,10 @@ function AddMockInterview() {
         jobDesc: jobdesc,
         jobPosition: role,
         jobexperience: years,
-        MockResponse: parsedResponse,
+        MockResponse: parsedResponse.interviewQuestions
       };
 
+      console.log(mockData)
       // Save the response to the database
       const response = await fetch("/api/mockInterview", {
         method: "POST",
@@ -69,10 +70,10 @@ function AddMockInterview() {
       }
     } catch (error) {
       if (error instanceof SyntaxError) {
-        console.error("Invalid JSON response:", error);
+        console.log("Invalid JSON response:", error);
         // Display a user-friendly error message
       } else {
-        console.error("Error fetching interview questions:", error);
+        console.log("Error fetching interview questions:", error);
         // Handle other errors
       }
     } finally {
@@ -165,7 +166,7 @@ function AddMockInterview() {
                     {loading ? (
                       <>
                         <LoaderPinwheelIcon className="animate-spin" />
-                        'Generating from AI'
+                        Generating from AI
                       </>
                     ) : (
                       "Start Interview"

@@ -4,7 +4,7 @@ import { LightbulbIcon, LucideWebcam } from "lucide-react";
 import Webcam from "react-webcam";
 import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-
+import Link from "next/link";
 function Interview() {
   const [interviewData, setInterviewData] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -12,7 +12,7 @@ function Interview() {
   const [webcamenabled, setwebcamenabled] = useState(false);
 
 
-  const { interviewid } = useParams();
+  const { interviewid } =  useParams();
   console.log('interviewid:', interviewid);
 
 
@@ -118,9 +118,10 @@ function Interview() {
        
       </div>
       <div className="flex items-center justify-center mt-5 my-3">
-  <button className="bg-violet-500 text-white font-semibold py-3 px-8 rounded-lg hover:scale-105 shadow-lg border border-violet-700 hover:bg-violet-600 hover:shadow-xl transition duration-300 ease-in-out transformfocus:outline-none focus:ring-2 focus:ring-violet-400 focus:ring-offset-2">
+  <Link className="bg-violet-500 text-white font-semibold py-3 px-8 rounded-lg hover:scale-105 shadow-lg border border-violet-700 hover:bg-violet-600 hover:shadow-xl transition duration-300 ease-in-out transformfocus:outline-none focus:ring-2 focus:ring-violet-400 focus:ring-offset-2"
+  href={`/dashboard/interview/${interviewid}/start`}>
     Start Interview
-  </button>
+  </Link>
 </div>
 
     </div>

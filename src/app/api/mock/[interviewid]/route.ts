@@ -6,9 +6,10 @@ export async function GET(
   { params }: { params: { interviewid: string } }
 ) {
   try {
+    const id= params.interviewid;
     const interview = await db.mockInterview.findUnique({
       where: {
-        id: params.interviewid,
+        id:  id,
       },
     });
     if (!interview) {
