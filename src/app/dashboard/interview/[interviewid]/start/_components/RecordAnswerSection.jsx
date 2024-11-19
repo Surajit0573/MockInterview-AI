@@ -1,12 +1,17 @@
 import { Button } from '@/components/ui/button';
-import { Mic, MicOff } from 'lucide-react';
+import { Mic, MicOff, PauseCircleIcon } from 'lucide-react';
 import Image from 'next/image';
 import React, { useState, useEffect } from 'react';
 import Webcam from 'react-webcam';
 import useSpeechToText from 'react-hook-speech-to-text';
+import { toast } from "sonner"
+import { chatSession } from '@/lib/AI/GeminiAIModel';
 
-function RecordAnswerSection() {
+
+function RecordAnswerSection({mockInterviewQuestion,activeQuestionIndex,interviewid}) {
   const [userAnswer, setUserAnswer] = useState('');
+
+
   const {
     error,
     interimResult,
@@ -26,6 +31,51 @@ function RecordAnswerSection() {
       });
     }
   }, [results]);
+
+  const recordUserAnswer=async()=>{
+    if(isRecording){
+      stopSpeechToText();
+      if(userAnswer?.length<10){
+        toast('Error while saving your answer,Please record it again');
+        return;
+      }
+      const feedbackPrompt=`Question:${mockInterviewQuestion[activeQuestionIndex]?.question},User Answer:${userAnswer},
+      Depending on question and user answer for given interview question,please 
+      give us rating for answer and feedback as area of improvement
+      if any in just 4-5 lines to improve it in JSON format
+      with rating field and feedback field`;
+      const result=await chatSession.sendMessage(feedbackPrompt);
+      const mockJsonResp=(result.response.text());
+      const cleanedResponse=mockJsonResp.replace(/```json/g, "").replace(/```/g, "").trim();
+      console.log('cleanedResponse',cleanedResponse);
+      if(cleanedResponse){
+        const mockUserAns={
+          mockInterviewId:interviewid,
+          question:mockInterviewQuestion[activeQuestionIndex]?.question,
+          userAnswer:userAnswer,
+          feedback:JSON.parse(cleanedResponse),
+
+        }
+        console.log(mockUserAns);
+        const response = await fetch(`/api/mock/${interviewid}/ans`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(mockUserAns),
+        });
+        
+        if (!response.ok) {
+          toast('Error while saving your answer, please try again.');
+          return;
+        }
+        const data = await response.json();
+        toast(data.message || 'Answer saved successfully!');
+  
+      }
+
+    }else{
+      startSpeechToText();
+    }
+  }
 
   if (error) return <p className='text-center text-red-500'>Web Speech API is not available in this browser 🤷‍</p>;
 
@@ -51,11 +101,11 @@ function RecordAnswerSection() {
       <Button
         className={`flex items-center gap-2 px-6 py-3 text-lg font-semibold transition-all duration-300 rounded-full shadow-md
           ${isRecording ? 'bg-red-600 hover:bg-red-700 text-white' : 'bg-violet-600 hover:bg-violet-700 text-white'}`}
-        onClick={isRecording ? stopSpeechToText : startSpeechToText}
+        onClick={recordUserAnswer}
       >
         {isRecording ? (
           <>
-            <MicOff className='animate-pulse' />
+            <PauseCircleIcon className='animate-pulse' />
             Stop Recording
           </>
         ) : (
