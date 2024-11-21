@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
     const { question, feedback, userAnswer, mockInterviewId } = body;
 
     // Validate request body
-    if (!question || !feedback?.rating || !feedback?.feedback || !userAnswer || !mockInterviewId) {
+    if (!question || !feedback?.rating || !feedback?.feedback ||!feedback.correct_answer|| !userAnswer || !mockInterviewId) {
       return NextResponse.json({ error: 'Missing or invalid fields in request.' }, { status: 400 });
     }
 
@@ -32,6 +32,7 @@ export async function POST(request: NextRequest) {
         feedback: feedback.feedback,
         userAnswer,
         userId,
+        correctAnswer:feedback.correct_answer,
         mockInterviewId: mockInterviewId.toString()
       }
     });

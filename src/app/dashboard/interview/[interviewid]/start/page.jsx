@@ -6,6 +6,7 @@ import RecordAnswerSection from "./_components/RecordAnswerSection";
 import { Button } from "@/components/ui/button";
 import { useStopwatch } from "react-timer-hook";
 import Link from "next/link";
+import ClockLoader from "react-spinners/ClockLoader";
 
 function StartInterview() {
   const [interviewData, setInterviewData] = useState();
@@ -15,7 +16,7 @@ function StartInterview() {
   const { interviewid } = useParams();
   const [activeQuestionIndex, setActiveQuestionIndex] = useState(0);
 
-  console.log("interviewid:", interviewid);
+  // console.log("interviewid:", interviewid);
   const { seconds, minutes, hours, start, pause, reset } = useStopwatch({
     autoStart: true,
   });
@@ -68,7 +69,13 @@ function StartInterview() {
   if (loading)
     return (
       <div className="flex justify-center items-center h-screen text-gray-600">
-        Loading...
+       <ClockLoader
+  color="rgba(78, 29, 29, 1)"
+  cssOverride={{}}
+  loading
+  size={120}
+  speedMultiplier={2}
+/>
       </div>
     );
   if (error)
@@ -135,7 +142,7 @@ function StartInterview() {
           Previous
         </Button>
         <Link
-         href='/dashboard'
+         href={`/dashboard/interview/${interviewid}/feedback`}
           className="px-6 py-3 bg-red-500 hover:bg-red-600 text-white rounded-lg shadow transition-all"
         >
           End

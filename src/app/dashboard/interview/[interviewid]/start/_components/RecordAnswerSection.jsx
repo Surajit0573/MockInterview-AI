@@ -7,13 +7,12 @@ import useSpeechToText from "react-hook-speech-to-text";
 import { toast } from "sonner";
 import { chatSession } from "@/lib/AI/GeminiAIModel";
 
-
 function RecordAnswerSection({
   mockInterviewQuestion,
   activeQuestionIndex,
   interviewid,
 }) {
-  const [userAnswer, setUserAnswer] = useState('');
+  const [userAnswer, setUserAnswer] = useState("");
   const [loading, setloading] = useState(false);
 
   const {
@@ -32,9 +31,9 @@ function RecordAnswerSection({
     if (results && results.length > 0) {
       // Only use the current session's results
       const currentSessionAnswer = results
-        .slice(results.length - 1) 
-        .map(result => result?.transcript)
-        .join(' ');
+        .slice(results.length - 1)
+        .map((result) => result?.transcript)
+        .join(" ");
       setUserAnswer(currentSessionAnswer);
     }
   }, [results]);
@@ -42,12 +41,11 @@ function RecordAnswerSection({
   useEffect(() => {
     if (!isRecording && userAnswer?.length > 10) {
       updateAnswertodb();
-    }
-    if (userAnswer?.length < 10) {
+    } else {
       toast("Error while saving your answer, Please record it again");
       return;
     }
-  }, [userAnswer]); 
+  }, [isRecording]);
 
   const startstoprecording = async () => {
     if (isRecording) {
@@ -59,48 +57,50 @@ function RecordAnswerSection({
       ) {
         return;
       }
-      setUserAnswer(''); // Clear previous answer
+      setUserAnswer(""); // Clear previous answer
       startSpeechToText();
     }
   };
 
   const updateAnswertodb = async () => {
     setloading(true);
-    console.log('Current answer:', userAnswer);
-     // const feedbackPrompt=`Question:${mockInterviewQuestion[activeQuestionIndex]?.question},User Answer:${userAnswer},
-    // Depending on question and user answer for given interview question,please
-    // give us rating for answer and feedback as area of improvement
-    // if any in just 4-5 lines to improve it in JSON format
-    // with rating field and feedback field`;
-    // const result=await chatSession.sendMessage(feedbackPrompt);
-    // const mockJsonResp=(result.response.text());
-    // const cleanedResponse=mockJsonResp.replace(/```json/g, "").replace(/```/g, "").trim();
-    // console.log('cleanedResponse',cleanedResponse);
-    // if(cleanedResponse){
-    //   const mockUserAns={
-    //     mockInterviewId:interviewid,
-    //     question:mockInterviewQuestion[activeQuestionIndex]?.question,
-    //     userAnswer:userAnswer,
-    //     feedback:JSON.parse(cleanedResponse),
+    console.log("Current answer:", userAnswer);
+    const feedbackPrompt = `Question:${mockInterviewQuestion[activeQuestionIndex]?.question},User Answer:${userAnswer},
+    Depending on question and user answer for given interview question,please
+    give us rating for answer, feedback as area of improvement(
+    if any) and also correct answer related to the question in just 4-5 lines to improve it in JSON format
+    with rating field ,feedback field and correct answer field`;
+    const result = await chatSession.sendMessage(feedbackPrompt);
+    const mockJsonResp = result.response.text();
+    const cleanedResponse = mockJsonResp
+      .replace(/```json/g, "")
+      .replace(/```/g, "")
+      .trim();
+    console.log("cleanedResponse", cleanedResponse);
+    if (cleanedResponse) {
+      const mockUserAns = {
+        mockInterviewId: interviewid,
+        question: mockInterviewQuestion[activeQuestionIndex]?.question,
+        userAnswer: userAnswer,
+        // correctAnswer:correct_answer,
+        feedback: JSON.parse(cleanedResponse),
+      };
+      console.log(mockUserAns);
+      const response = await fetch(`/api/mock/${interviewid}/ans`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(mockUserAns),
+      });
 
-    //   }
-    //   console.log(mockUserAns);
-    //   const response = await fetch(`/api/mock/${interviewid}/ans`, {
-    //     method: "POST",
-    //     headers: { "Content-Type": "application/json" },
-    //     body: JSON.stringify(mockUserAns),
-    //   });
+      if (!response.ok) {
+        toast("Error while saving your answer, please try again.");
+        return;
+      }
+      const data = await response.json();
+      toast(data.message || "Answer saved successfully!");
 
-    //   if (!response.ok) {
-    //     toast('Error while saving your answer, please try again.');
-    //     return;
-    //   }
-    //   const data = await response.json();
-    //   toast(data.message || 'Answer saved successfully!');
-
-
-  
-    setloading(false);
+      setloading(false);
+    }
   };
 
   if (error)
@@ -112,7 +112,6 @@ function RecordAnswerSection({
 
   return (
     <div className="flex flex-col items-center justify-center space-y-6">
-     
       <div className="mt-7 my-7 relative flex items-center justify-center bg-gray-900 rounded-lg overflow-hidden shadow-lg">
         <Image
           src="/webcam1.png"
@@ -128,7 +127,6 @@ function RecordAnswerSection({
         />
       </div>
 
-      {/* Recording Button */}
       <Button
         className={`flex items-center gap-2 px-6 py-3 text-lg font-semibold transition-all duration-300 rounded-full shadow-md
           ${
@@ -157,10 +155,8 @@ function RecordAnswerSection({
         className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow-md transition-colors duration-300"
         onClick={() => console.log(userAnswer)}
       >
-        Show User Answer
+        Show My Answer
       </Button>
-
-      {/* Display the Transcribed Answer */}
       {userAnswer && (
         <div className="mt-8 p-4 w-full max-w-2xl bg-gray-100 border border-gray-300 rounded-lg shadow-inner">
           <h2 className="text-lg font-semibold text-gray-800 mb-3">

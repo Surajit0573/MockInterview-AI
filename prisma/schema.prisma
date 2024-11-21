@@ -27,6 +27,7 @@ model UserAnswer{
   createdAt   DateTime @default(now())
   feedback  String
   rating        Int
+  correctAnswer  String
   mockInterviewId  String  @db.ObjectId
   mockInterview   MockInterview? @relation(fields: [mockInterviewId],references: [id])
 }
