@@ -1,8 +1,11 @@
-'use client'
-import React, { useState, useEffect } from 'react';
+"use client";
+import React, { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
-import InterviewQuestions from './_components/Questions';
-import RecordAnswerSection from './_components/RecordAnswerSection'
+import InterviewQuestions from "./_components/Questions";
+import RecordAnswerSection from "./_components/RecordAnswerSection";
+import { Button } from "@/components/ui/button";
+import { useStopwatch } from "react-timer-hook";
+import Link from "next/link";
 
 function StartInterview() {
   const [interviewData, setInterviewData] = useState();
@@ -10,10 +13,13 @@ function StartInterview() {
   const [mockInterviewQuestion, setmockInterviewQuestion] = useState([]);
   const [error, setError] = useState();
   const { interviewid } = useParams();
-  const[activeQuestionIndex,setActiveQuestionIndex]=useState(0);
-  
-  console.log('interviewid:', interviewid);
-  
+  const [activeQuestionIndex, setActiveQuestionIndex] = useState(0);
+
+  console.log("interviewid:", interviewid);
+  const { seconds, minutes, hours, start, pause, reset } = useStopwatch({
+    autoStart: true,
+  });
+
   useEffect(() => {
     const getDetails = async () => {
       try {
@@ -24,11 +30,11 @@ function StartInterview() {
         const data = await response.json();
         console.log("data:", data);
         setInterviewData(data);
-        
+
         // Ensure MockResponse is an array
         const parsedQuestions = data.MockResponse || [];
         setmockInterviewQuestion(parsedQuestions);
-        console.log('mockInterviewQuestion:', parsedQuestions);
+        console.log("mockInterviewQuestion:", parsedQuestions);
       } catch (err) {
         console.error("Error fetching interview data:", err);
         setError(err.message);
@@ -42,20 +48,106 @@ function StartInterview() {
     }
   }, [interviewid]);
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error}</div>;
+  const handleNext = () => {
+    if (activeQuestionIndex < mockInterviewQuestion.length - 1) {
+      setActiveQuestionIndex((prev) => prev + 1);
+    }
+  };
+
+  const handlePrevious = () => {
+    if (activeQuestionIndex > 0) {
+      setActiveQuestionIndex((prev) => prev - 1);
+    }
+  };
+
+  const handleEnd = () => {
+    console.log("End of the interview.");
+    // Handle end-of-interview logic here
+  };
+
+  if (loading)
+    return (
+      <div className="flex justify-center items-center h-screen text-gray-600">
+        Loading...
+      </div>
+    );
+  if (error)
+    return (
+      <div className="flex justify-center items-center h-screen text-red-600">
+        Error: {error}
+      </div>
+    );
 
   return (
-    <div className='grid grid-cols-1 md:grid-cols-2'>
-      <InterviewQuestions
-       mockInterviewQuestion={mockInterviewQuestion}
-       activeQuestionIndex={activeQuestionIndex} />
-       <div>
-        <RecordAnswerSection
-         mockInterviewQuestion={mockInterviewQuestion}
-         activeQuestionIndex={activeQuestionIndex}
-         interviewid={interviewid} />
-       </div>
+    <div className="min-h-screen">
+      <div className="flex flex-col items-center justify-center bg-white shadow-lg rounded-lg max-w-2xl mx-auto mt-2 p-6">
+        <p className="text-lg font-semibold text-gray-700">Interview Timer</p>
+        <div className="text-4xl font-bold text-gray-800 mt-2">
+          {hours}:{minutes}:{seconds}
+        </div>
+        <div className="flex gap-4 mt-4">
+          <button
+            onClick={start}
+            className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-md shadow transition-all"
+          >
+            Start
+          </button>
+          <button
+            onClick={pause}
+            className="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white font-semibold rounded-md shadow transition-all"
+          >
+            Pause
+          </button>
+          <button
+            onClick={reset}
+            className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-md shadow transition-all"
+          >
+            Reset
+          </button>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="container mx-auto mt-4 grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <InterviewQuestions
+            mockInterviewQuestion={mockInterviewQuestion}
+            activeQuestionIndex={activeQuestionIndex}
+            setActiveQuestionIndex={setActiveQuestionIndex}
+          />
+        </div>
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <RecordAnswerSection
+            mockInterviewQuestion={mockInterviewQuestion}
+            activeQuestionIndex={activeQuestionIndex}
+            interviewid={interviewid}
+          />
+        </div>
+      </div>
+
+      {/* Buttons Section */}
+      <div className="flex justify-center items-center gap-6 mt-6 mb-5">
+        <Button
+          onClick={handlePrevious}
+          className="px-6 py-3 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-lg shadow transition-all"
+          disabled={activeQuestionIndex === 0}
+        >
+          Previous
+        </Button>
+        <Link
+         href='/dashboard'
+          className="px-6 py-3 bg-red-500 hover:bg-red-600 text-white rounded-lg shadow transition-all"
+        >
+          End
+        </Link>
+        <Button
+          onClick={handleNext}
+          className="px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow transition-all"
+          disabled={activeQuestionIndex === mockInterviewQuestion.length - 1}
+        >
+          Next
+        </Button>
+      </div>
     </div>
   );
 }

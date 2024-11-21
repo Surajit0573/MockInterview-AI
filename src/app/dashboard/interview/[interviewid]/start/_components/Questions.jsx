@@ -1,10 +1,11 @@
 import { LightbulbIcon, LucideVolume2, LucidePauseCircle, LucidePlayCircle, LucideStopCircle } from 'lucide-react';
 import React, { useState } from 'react';
 
-function InterviewQuestions({ mockInterviewQuestion, activeQuestionIndex }) {
+function InterviewQuestions({ mockInterviewQuestion, activeQuestionIndex,setActiveQuestionIndex }) {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [speechInstance, setSpeechInstance] = useState(null);
+
 
   const texttoSpeech = (text) => {
     if ('speechSynthesis' in window) {
@@ -46,10 +47,13 @@ function InterviewQuestions({ mockInterviewQuestion, activeQuestionIndex }) {
     mockInterviewQuestion && (
       <div className='p-6 bg-white border rounded-lg shadow-lg max-w-4xl mx-auto'>
         {/* Question Navigation */}
-        <div className='grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 mb-8'>
+        <div className='grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 mb-8'
+        >
+
           {mockInterviewQuestion.map((_, index) => (
-            <h2
+            <button
               key={index}
+              onClick={()=>setActiveQuestionIndex(index)}
               className={`py-2 px-4 rounded-full text-xs md:text-sm text-center cursor-pointer transition-colors duration-200
               ${activeQuestionIndex === index
                   ? 'bg-violet-600 text-white shadow-lg'
@@ -57,7 +61,7 @@ function InterviewQuestions({ mockInterviewQuestion, activeQuestionIndex }) {
                 }`}
             >
               Question #{index + 1}
-            </h2>
+            </button>
           ))}
         </div>
 
