@@ -21,10 +21,34 @@ export async function POST(request: NextRequest) {
 
     const userId = user.id;
 
-    // Convert mockInterviewId to ObjectId
+    
  
 
-    // Save the user's answer
+    const existingAnswer=await db.userAnswer.findFirst({
+      where:{
+        mockInterviewId:mockInterviewId,
+        question:question
+
+      }
+    })
+
+    if(existingAnswer){
+      const updateAnswer=await db.userAnswer.update(
+        {
+          where:{
+            id:existingAnswer.id
+        },
+        data:{
+          rating: feedback.rating,
+          feedback: feedback.feedback,
+          userAnswer,
+          correctAnswer: feedback.correct_answer,
+
+        }
+      }
+      )
+      return NextResponse.json({ message: 'Answer updated successfully.' }, { status: 200 });
+    }else{
     const newMockAns = await db.userAnswer.create({
       data: {
         question,
@@ -36,8 +60,10 @@ export async function POST(request: NextRequest) {
         mockInterviewId: mockInterviewId.toString()
       }
     });
+  
 
     return NextResponse.json({ message: 'Mock Answer created successfully', newMockAns });
+  }
   } catch (error: any) {
     console.error('Error saving mock interview answer:', error.message || error);
     return NextResponse.json({ error: 'Error saving mock interview answer' }, { status: 500 });

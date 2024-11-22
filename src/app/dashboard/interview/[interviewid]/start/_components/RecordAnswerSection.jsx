@@ -38,14 +38,14 @@ function RecordAnswerSection({
     }
   }, [results]);
 
-  useEffect(() => {
-    if (!isRecording && userAnswer?.length > 10) {
-      updateAnswertodb();
-    } else {
-      toast("Error while saving your answer, Please record it again");
-      return;
-    }
-  }, [isRecording]);
+  // useEffect(() => {
+  //   if (!isRecording && userAnswer?.length > 10) {
+  //     updateAnswertodb();
+  //   } else {
+  //     toast("Error while saving your answer, Please record it again");
+  //     return;
+  //   }
+  // }, [isRecording]);
 
   const startstoprecording = async () => {
     if (isRecording) {
@@ -65,43 +65,51 @@ function RecordAnswerSection({
   const updateAnswertodb = async () => {
     setloading(true);
     console.log("Current answer:", userAnswer);
-    const feedbackPrompt = `Question:${mockInterviewQuestion[activeQuestionIndex]?.question},User Answer:${userAnswer},
-    Depending on question and user answer for given interview question,please
-    give us rating for answer, feedback as area of improvement(
-    if any) and also correct answer related to the question in just 4-5 lines to improve it in JSON format
-    with rating field ,feedback field and correct answer field`;
-    const result = await chatSession.sendMessage(feedbackPrompt);
-    const mockJsonResp = result.response.text();
-    const cleanedResponse = mockJsonResp
-      .replace(/```json/g, "")
-      .replace(/```/g, "")
-      .trim();
-    console.log("cleanedResponse", cleanedResponse);
-    if (cleanedResponse) {
-      const mockUserAns = {
-        mockInterviewId: interviewid,
-        question: mockInterviewQuestion[activeQuestionIndex]?.question,
-        userAnswer: userAnswer,
-        // correctAnswer:correct_answer,
-        feedback: JSON.parse(cleanedResponse),
-      };
-      console.log(mockUserAns);
-      const response = await fetch(`/api/mock/${interviewid}/ans`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(mockUserAns),
-      });
-
-      if (!response.ok) {
-        toast("Error while saving your answer, please try again.");
-        return;
+    if (userAnswer?.length > 10) {
+      const feedbackPrompt = `Question:${mockInterviewQuestion[activeQuestionIndex]?.question},User Answer:${userAnswer},
+      Depending on question and user answer for given interview question,please
+      give us rating for answer, feedback as area of improvement(
+      if any) and also correct answer related to the question in just 4-5 lines to improve it in JSON format
+      with rating field ,feedback field and correct answer field`;
+      const result = await chatSession.sendMessage(feedbackPrompt);
+      const mockJsonResp = result.response.text();
+      const cleanedResponse = mockJsonResp
+        .replace(/```json/g, "")
+        .replace(/```/g, "")
+        .trim();
+      console.log("cleanedResponse", cleanedResponse);
+      if (cleanedResponse) {
+        const mockUserAns = {
+          mockInterviewId: interviewid,
+          question: mockInterviewQuestion[activeQuestionIndex]?.question,
+          userAnswer: userAnswer,
+          feedback: JSON.parse(cleanedResponse),
+        };
+        console.log(mockUserAns);
+  
+        // Declare and assign response
+        const response = await fetch(`/api/mock/${interviewid}/ans`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(mockUserAns),
+        });
+  
+        if (response.ok) {
+          const data = await response.json();
+          toast(data.message || "Answer saved successfully!");
+          setloading(false);
+        } else {
+          toast("Error while saving your answer, please try again.");
+          setloading(false);
+        }
       }
-      const data = await response.json();
-      toast(data.message || "Answer saved successfully!");
-
+    } else {
+      toast("Error while saving your answer, please try again.");
       setloading(false);
+      return;
     }
   };
+  
 
   if (error)
     return (
@@ -165,6 +173,9 @@ function RecordAnswerSection({
           <p className="text-gray-700 whitespace-pre-wrap">{userAnswer}</p>
         </div>
       )}
+      <Button onClick={updateAnswertodb} className="bg-green-400 text-black">
+        Save my Answer
+      </Button>
     </div>
   );
 }
