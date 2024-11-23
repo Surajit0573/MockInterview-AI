@@ -76,7 +76,7 @@ function Feedback() {
                     ))
                 ) : (
                     <p className="text-gray-500 text-center">
-                        No feedback available for this interview.
+                        No Interview Record available for this interview.
                     </p>
                 )}
                 <div className="mt-8 text-center">

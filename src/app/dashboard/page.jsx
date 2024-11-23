@@ -1,6 +1,7 @@
 import { UserButton, UserProfile } from '@clerk/nextjs'
 import React from 'react'
 import AddMockInterview from './_components/AddMockInterview'
+import AllInterview from './_components/allInterviews'
 
 function page() {
 
@@ -11,7 +12,12 @@ function page() {
         <div className='grid grid-cols-1 md:grid-cols-3 my-5'>
           <AddMockInterview/>
 
+         
+
         </div>
+        <div>
+            <AllInterview/>
+          </div>
         
 
     </div>

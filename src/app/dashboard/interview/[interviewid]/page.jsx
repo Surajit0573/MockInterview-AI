@@ -5,9 +5,11 @@ import Webcam from "react-webcam";
 import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import { Skeleton } from "@/components/ui/skeleton"
+
 function Interview() {
   const [interviewData, setInterviewData] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [webcamenabled, setwebcamenabled] = useState(false);
 
@@ -43,7 +45,19 @@ function Interview() {
   }, [interviewid]);
 
   // Handle loading state
-  if (loading) return <div>Loading...</div>;
+  if (loading)
+    return (
+      <div className="p-10 mt-0 rounded-lg shadow-lg space-y-6">
+        {/* Skeleton for Interview Details Section */}
+        <div className=" flex flex-col lg:flex-row gap-10 items-start lg:items-center w-full">
+         
+          <Skeleton className="w-full lg:w-1/2 bg-gray-200 p-6 rounded-lg h-80 shadow-md border border-gray-200" />
+          <Skeleton className="w-full lg:w-1/2 flex flex-col items-center justify-center h-80 bg-gray-200 p-8 rounded-lg shadow-md border border-gray-300" />
+        </div>
+        
+      </div>
+    );
+
 
   // Handle error state
   if (error) return <div>Error: {error}</div>;
@@ -105,14 +119,15 @@ function Interview() {
                 <LucideWebcam className="h-24 w-24 text-gray-500" />
                 <p className="text-gray-700 mt-4">Web Camera Disabled</p>
               </div>
-              <button
+              
+            </>
+          )}
+          <button
                 onClick={() => setwebcamenabled(true)}
                 className="mt-6 bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-lg shadow-md transition duration-200"
               >
                 Enable Web Camera and Microphone
               </button>
-            </>
-          )}
           
         </div>
        
