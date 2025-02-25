@@ -3,8 +3,8 @@ import { currentUser } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request:NextRequest){
-    const user=currentUser();
-    const userid=user.id;
+    const user=await currentUser();
+    const userid=user?.id;
     try{
         const fetchAllInterviews=await db.mockInterview.findMany({
             where:{
