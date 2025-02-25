@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { FaFacebookF, FaInstagram, FaYoutube, FaLinkedinIn } from 'react-icons/fa';
+import { FaFacebookF, FaInstagram, FaYoutube, FaLinkedinIn,FaGithub } from 'react-icons/fa';
 import Image from 'next/image';
 
 const Home = () => {
@@ -274,7 +274,7 @@ const Home = () => {
                 </div>
                 <textarea
                   placeholder="Your message"
-                  rows="4"
+                  rows={4}
                   className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent mb-6"
                 ></textarea>
                 <Button

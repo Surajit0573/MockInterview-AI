@@ -16,7 +16,7 @@ model User {
   ProfileImage String?
   Skills       String[]
   Type         String   @default("Interviewee")
-  Experience   Experience[]
+  Experience   Experiences[]
   Linkedin     String?
   Github       String?
   AvgRating    Int

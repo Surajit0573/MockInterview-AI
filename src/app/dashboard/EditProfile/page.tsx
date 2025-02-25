@@ -3,7 +3,7 @@
 import { useState, useCallback, SetStateAction } from 'react';
 import { useForm } from 'react-hook-form';
 import { Calendar, Mail, Linkedin, MessageSquare, Info, X } from 'lucide-react';
-import { useDropzone } from 'react-dropzone';
+import { DropEvent, FileRejection, useDropzone } from 'react-dropzone';
 import Experience from '../_components/Experience';
 
 export default function ProfilePage() {
@@ -42,12 +42,11 @@ export default function ProfilePage() {
   const [uploadedFiles, setUploadedFiles] = useState([]);
   
   // Handle file drop
-  const onDrop = useCallback((acceptedFiles: SetStateAction<never[]>) => {
-    // Update the state with the accepted files
-    setUploadedFiles(acceptedFiles);
-  }, []);
+  const onDrop = (acceptedFiles: File[], fileRejections: FileRejection[], event: DropEvent) => {
+    console.log(acceptedFiles);
+    // Process the files (e.g., update state)
+  };
   
-  // Initialize dropzone
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: {
@@ -57,6 +56,7 @@ export default function ProfilePage() {
     },
     maxFiles: 1,
   });
+  
 
   // Initialize react-hook-form
   const form = useForm({
@@ -109,7 +109,7 @@ export default function ProfilePage() {
   const tabs = [
     { id: 'personal', label: 'Personal' },
     { id: 'skills', label: 'Skills' },
-    { id: 'exp', label: 'experience' },
+    { id: 'exp', label: 'Experience' },
   ];
 
   return (
@@ -336,6 +336,12 @@ export default function ProfilePage() {
                       )}
                     </div>
                   </div>
+                  <button
+                type="submit"
+                className="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-3 px-4 rounded-md"
+              >
+                Save Profile
+              </button>
                 </>
               )}
               
@@ -413,15 +419,16 @@ export default function ProfilePage() {
                       </div>
                     </div>
                   </div>
+                  <button
+                type="submit"
+                className="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-3 px-4 rounded-md mt-6"
+              >
+                Save Skills
+              </button>
                 </div>
               )}
               
-              <button
-                type="submit"
-                className="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-3 px-4 rounded-md"
-              >
-                Save Profile
-              </button>
+            
             </form>
           </div>
           
