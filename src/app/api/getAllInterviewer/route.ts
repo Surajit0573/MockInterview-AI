@@ -3,9 +3,9 @@ import { NextResponse } from "next/server";
 
 export async function GET(req: Request) {
   try {
-    const interviewers = await db.User.findMany({
+    const interviewers = await db.user.findMany({
       where:{
-        type: "interviewer"
+        Type: "interviewer"
       }
     });
     return NextResponse.json(interviewers);
