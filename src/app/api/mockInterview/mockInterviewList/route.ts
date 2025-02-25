@@ -3,8 +3,9 @@ import { currentUser } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request:NextRequest){
-    const user=currentUser();
-    const userid=user.id;
+    const user=await currentUser();
+    console.log("user:",user);
+    const userid=user?.id;
     try{
         const fetchAllInterviews=await db.mockInterview.findMany({
             where:{
@@ -13,7 +14,7 @@ export async function GET(request:NextRequest){
             }
         })
         return NextResponse.json(fetchAllInterviews);
-       
+
 
     }catch(error:any){
         console.log("error in fetching all Interviews",error.message||error);
@@ -21,7 +22,7 @@ export async function GET(request:NextRequest){
             {message:"error fetching all interview questions"},
             {status:500}
         );
-        
+
     }
 
 }
