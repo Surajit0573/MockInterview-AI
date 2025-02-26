@@ -12,6 +12,7 @@ import {
 
 import { useState, useTransition } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
+import { addExperiences } from "@/app/actions/addExperience";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -65,19 +66,19 @@ function ExperienceSettingsPage() {
 
   const onSubmit = async (values: any) => {
     console.log(values);
-    // startTransition(() => {
-    //   addExperiences(values)
-    //     .then((data) => {
-    //       if (data.error) {
-    //         setError(data.error);
-    //         setSuccess(undefined);
-    //       } else if (data.success) {
-    //         setSuccess(data.success);
-    //         setError(undefined);
-    //       }
-    //     })
-    //     .catch(() => setError("Something went wrong!"));
-    // });
+    startTransition(() => {
+      addExperiences(values)
+        .then((data) => {
+          if (data.error) {
+            setError(data.error);
+            setSuccess(undefined);
+          } else if (data.success) {
+            setSuccess(data.success);
+            setError(undefined);
+          }
+        })
+        .catch(() => setError("Something went wrong!"));
+    });
   };
 
   return (
