@@ -16,7 +16,7 @@ model User {
   ProfileImage String?
   Skills       String[]
   Type         String   @default("Interviewee")
-  Experience   Json[]
+  Experience   Experiences[]
   Linkedin     String?
   Github       String?
   AvgRating    Int
@@ -30,6 +30,18 @@ enum gender {
   male
   female
 }
+ model Experiences{
+  id            String   @id  @map("_id") @db.ObjectId
+  userId        String   @db.ObjectId
+  ComapnyName   String?
+  Role          String[]
+  Description   String?
+  Duration      String?
+   User    User         @relation(fields: [userId], references: [id])
+
+ }
+
+ 
 
 model MockInterview {
   id            String   @id @default(auto()) @map("_id") @db.ObjectId
