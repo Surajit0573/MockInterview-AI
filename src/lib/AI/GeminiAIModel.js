@@ -5,7 +5,7 @@ const {
 } = require("@google/generative-ai");
 
 const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
-
+console.log(apiKey);
 const genAI = new GoogleGenerativeAI(apiKey);
 
 const model = genAI.getGenerativeModel({
@@ -23,7 +23,5 @@ const generationConfig = {
 
   export const chatSession = model.startChat({
     generationConfig,
-   
-  });
 
- 
+  });

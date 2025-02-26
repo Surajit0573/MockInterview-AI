@@ -21,8 +21,8 @@ export async function POST(request: NextRequest) {
 
     const userId = user.id;
 
-    
- 
+
+
 
     const existingAnswer=await db.userAnswer.findFirst({
       where:{
@@ -39,8 +39,8 @@ export async function POST(request: NextRequest) {
             id:existingAnswer.id
         },
         data:{
-          rating: feedback.rating,
-          feedback: feedback.feedback,
+          Intervieweerating: feedback.rating,
+          Intervieweefeedback: feedback.feedback,
           userAnswer,
           correctAnswer: feedback.correct_answer,
 
@@ -52,15 +52,15 @@ export async function POST(request: NextRequest) {
     const newMockAns = await db.userAnswer.create({
       data: {
         question,
-        rating: feedback.rating,
-        feedback: feedback.feedback,
+        Intervieweerating: feedback.rating,
+        Intervieweefeedback: feedback.feedback,
         userAnswer,
         userId,
         correctAnswer:feedback.correct_answer,
         mockInterviewId: mockInterviewId.toString()
       }
     });
-  
+
 
     return NextResponse.json({ message: 'Mock Answer created successfully', newMockAns });
   }

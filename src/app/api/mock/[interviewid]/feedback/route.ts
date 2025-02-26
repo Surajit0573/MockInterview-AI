@@ -6,10 +6,10 @@ export async function GET(
   { params }: { params: { interviewid: any } }
 ) {
   try {
-    const id = params.interviewid;
+    const {interviewid} = params
     const fetchInterviewfeedback = await db.userAnswer.findMany({
       where: {
-        mockInterviewId: id,
+        mockInterviewId: interviewid,
       },
     });
     if (!fetchInterviewfeedback) {
