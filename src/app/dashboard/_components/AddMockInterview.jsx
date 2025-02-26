@@ -1,18 +1,17 @@
 "use client";
 
-import React, { useState } from "react";
-import { LoaderPinwheelIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
-  DialogTitle,
-  DialogTrigger,
+  DialogTitle
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { chatSession } from "../../../lib/AI/GeminiAIModel";
+import { LoaderPinwheelIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { chatSession } from "../../../lib/AI/GeminiAIModel";
 
 function AddMockInterview() {
   const [openDialog, setOpenDialog] = useState(false);
@@ -34,6 +33,8 @@ function AddMockInterview() {
 
       // Send the message to the chat session
       const res = await chatSession.sendMessage(InputPrompt);
+      console.log("res");
+      console.log("res",res);
       const mockJsonResponse = res.response.text();
 
       const cleanedResponse = mockJsonResponse.replace(/```json/g, "").replace(/```/g, "").trim();
@@ -60,7 +61,7 @@ function AddMockInterview() {
       if (!response.ok) {
         throw new Error("Failed to save interview data");
       }
-     
+
 
       const savedResponse = await response.json();
       console.log("Saved to database:", savedResponse);
@@ -91,7 +92,7 @@ function AddMockInterview() {
         <h2 className="font-bold text-lg text-center">+ Add New</h2>
       </div>
 
-   
+
       <Dialog open={openDialog} onOpenChange={setOpenDialog}>
         <DialogContent className="max-w-3xl">
           <DialogHeader>

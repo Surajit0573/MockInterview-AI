@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
+import { currentUser } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
-import { currentUser  } from "@clerk/nextjs/server";
 
 export async function POST(request: NextRequest) {
   try {
@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
 
     const user = await currentUser ();
     if (!user) {
-   
+
       return NextResponse.json(
         { error: 'Unauthorized. Please log in.' },
         { status: 401 }
@@ -32,6 +32,7 @@ export async function POST(request: NextRequest) {
         jobDesc,
         jobPosition,
         jobexperience,
+        Roles:[jobPosition],
         MockResponse,
         userId: user.id,
       },
