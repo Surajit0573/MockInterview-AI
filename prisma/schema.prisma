@@ -8,54 +8,65 @@ datasource db {
 }
 
 model User {
-  id           String   @id @map("_id") @db.ObjectId
+  id           String       @id @map("_id")
   name         String
-  email        String   @unique
-  Gender       gender
+  email        String       @unique
+  Gender       gender?
   description  String?
+  dob          String?
   ProfileImage String?
-  Skills       String[]
-  Type         String   @default("Interviewee")
-  Experience   Experiences[]
+ languages     String[]
+ tools         String[]
+ frameworks     String[]
+  Type         String       @default("Interviewee")
+  Experience   Experience[]
   Linkedin     String?
   Github       String?
+
   Twitter      String?
   AvgRating    Int
   createdAt    DateTime @default(now())
 
-  mockInterview MockInterview[]
-  timeSlots     TimeSlot[]
+
+  updatedAt DateTime   @default(now())
+  timeSlots TimeSlot[]
+
+  mockInterviewer MockInterview[] @relation("Interviewer")
+  mockInterviewee MockInterview[] @relation("Interviewee")
+  MockInterview   MockInterview[]
 }
 
 enum gender {
   male
   female
 }
- model Experiences{
-  id            String   @id  @map("_id") @db.ObjectId
-  userId        String   @db.ObjectId
-  ComapnyName   String?
-  Role          String[]
-  Description   String?
-  Duration      String?
-   User    User         @relation(fields: [userId], references: [id])
 
- }
+model Experience {
+  id          String  @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String  @unique
+  CompanyName String?
+  Role        String?
+  Description String?
+  Duration    String?
 
- 
+  User User @relation(fields: [userId], references: [id])
+}
 
 model MockInterview {
-  id            String   @id @default(auto()) @map("_id") @db.ObjectId
-  userId        String   @db.ObjectId
+  id            String       @id @default(auto()) @map("_id") @db.ObjectId
+  userId        String
+  interviewerId String
+  intervieweeId String
   MockResponse  Json[]
   jobPosition   String
   jobDesc       String
   jobexperience String
   Roles         String[]
-  createdAt     DateTime @default(now())
-
-  answers UserAnswer[]
-  User    User         @relation(fields: [userId], references: [id])
+  createdAt     DateTime     @default(now())
+  interviewer   User         @relation("Interviewer", fields: [interviewerId], references: [id])
+  interviewee   User         @relation("Interviewee", fields: [intervieweeId], references: [id])
+  answers       UserAnswer[]
+  User          User         @relation(fields: [userId], references: [id])
 }
 
 model UserAnswer {
@@ -68,6 +79,8 @@ model UserAnswer {
   Intervieweerating   Int
   InterviewerFeedback String?
   InterviewerRating   Int?
+  interviewerId       String
+  intervieweeId       String
 
   correctAnswer   String
   mockInterviewId String         @db.ObjectId
@@ -76,13 +89,12 @@ model UserAnswer {
 
 model TimeSlot {
   id        String         @id @default(auto()) @map("_id") @db.ObjectId
-  userId    String         @db.ObjectId
+  userId    String
   startTime DateTime
   endTime   DateTime
   status    TimeSlotStatus @default(available)
   createdAt DateTime       @default(now())
-
-  user User @relation(fields: [userId], references: [id])
+  user      User           @relation(fields: [userId], references: [id])
 }
 
 enum TimeSlotStatus {

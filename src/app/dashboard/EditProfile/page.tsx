@@ -1,42 +1,19 @@
 // pages/profile.js
 'use client'
-import { useState, useCallback, SetStateAction } from 'react';
+import { useState, useCallback, SetStateAction, useTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import { Calendar, Mail, Linkedin, MessageSquare, Info, X } from 'lucide-react';
 import { DropEvent, FileRejection, useDropzone } from 'react-dropzone';
 import Experience from '../_components/Experience';
+import Skills from '../_components/Skills'
+import { addPersonalProfile } from '@/app/actions/addPersonalProfile';
 
 export default function ProfilePage() {
-  // Tech tags for skills selection
-  const techtags = [
-    { value: "JavaScript", label: "JavaScript" },
-    { value: "React", label: "React" },
-    { value: "Node.js", label: "Node.js" },
-    { value: "TypeScript", label: "TypeScript" },
-    { value: "Python", label: "Python" },
-    { value: "Java", label: "Java" },
-    { value: "C#", label: "C#" },
-    { value: "Ruby", label: "Ruby" },
-    { value: "PHP", label: "PHP" },
-    { value: "Go", label: "Go" },
-    { value: "Rust", label: "Rust" },
-    { value: "HTML", label: "HTML" },
-    { value: "CSS", label: "CSS" },
-    { value: "SQL", label: "SQL" },
-    { value: "MongoDB", label: "MongoDB" },
-    { value: "AWS", label: "AWS" },
-    { value: "Azure", label: "Azure" },
-    { value: "Docker", label: "Docker" },
-    { value: "Kubernetes", label: "Kubernetes" },
-    { value: "Flutter", label: "Flutter" },
-  ];
-
-  // State for skills section
-  const [searchTerm, setSearchTerm] = useState('');
-  const skillColors = [
-    "bg-blue-600", "bg-purple-600", "bg-green-600", "bg-red-600", 
-    "bg-yellow-600", "bg-indigo-600", "bg-pink-600", "bg-teal-600"
-  ];
+    const [isPending, startTransition] = useTransition();
+    const [error, setError] = useState<string | undefined>();
+  const [success, setSuccess] = useState<string | undefined>();
+ 
+  
 
   // State for file upload
   const [uploadedFiles, setUploadedFiles] = useState([]);
@@ -59,50 +36,36 @@ export default function ProfilePage() {
   
 
   // Initialize react-hook-form
-  const form = useForm({
-    defaultValues: {
-      Name: 'Jarvis',
-      dob: '1996-09-12',
-      gender: 'male',
-      email: 'iamthejarvis@gmail.com',
-      linkedin: '/in/jarvis-23553141/',
-      github: 'qwe.ui1qQ3d345',
-      interview: 'no',
-      description: 'Write a short Introduction about yourself',
-      skills: []
-    }
-  });
-
+  const form = useForm();
+;
   // Destructure form methods
   const { register, handleSubmit, watch, formState: { errors }, control, setValue } = form;
-  const watchedSkills = watch('skills') || [];
 
   const [completionPercentage, setCompletionPercentage] = useState(10);
   const [activeTab, setActiveTab] = useState('personal');
 
-  // Filter tags based on search term
-  const filteredTags = techtags.filter(tag => 
-    tag.label.toLowerCase().includes(searchTerm.toLowerCase()) && 
-    !watchedSkills.includes(tag.value)
-  );
-
-  // Handle adding a skill
-  const handleSkillAdd = (skill: string) => {
-    if (!watchedSkills.includes(skill)) {
-      setValue('skills', [...watchedSkills, skill]);
-      setSearchTerm('');
-    }
-  };
-
-  // Handle removing a skill
-  const handleRemoveSkill = (skillToRemove: never) => {
-    setValue('skills', watchedSkills.filter(skill => skill !== skillToRemove));
-  };
+  
+ 
 
   const onSubmit = (data: any) => {
-    console.log(data);
+    console.log("data",data.Name);
     console.log('Uploaded file:', uploadedFiles);
-    // Handle form submission
+    startTransition(() => {
+      addPersonalProfile(data)
+        .then((data) => {
+          if (data.error) {
+            setError(data.error);
+            setSuccess(undefined);
+            console.log("data uploaded successfully");
+          } else if (data.success) {
+          
+            setError(undefined);
+          }
+        })
+        .catch(() => setError("Something went wrong!"));
+    });
+
+   
     setCompletionPercentage(prev => Math.min(prev + 10, 100));
   };
 
@@ -134,11 +97,16 @@ export default function ProfilePage() {
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-              {activeTab==='exp' && (
+          {activeTab==='exp' && (
                 <Experience/>
 
               )}
+          {activeTab==='skills' && (
+                <Skills/>
+
+              )}
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+             
               {/* Personal Details Section */}
               {activeTab === 'personal' && (
                 <>
@@ -248,7 +216,7 @@ export default function ProfilePage() {
                     <div className="relative mt-4">
                       <textarea
                         id="description"
-                        rows="4"
+                        rows={4}
                         className="w-full bg-gray-700 border border-gray-600 rounded-md p-2.5 text-white pr-10 resize-none"
                         placeholder="Enter your description..."
                         {...register('description', { required: true })}
@@ -258,37 +226,43 @@ export default function ProfilePage() {
                     </div>
                   </div>
                   
-                  {/* Availability Section */}
                   <div className="bg-gray-800 rounded-lg p-6">
-                    <h2 className="text-xl font-semibold mb-4">Availability Information</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
-                      <div>
-                        <label className="block text-sm text-gray-400 mb-1">Are you a Interviewer or Interviewee?</label>
-                        <div className="flex items-center space-x-6 bg-gray-700 border border-gray-600 rounded-md p-2.5">
-                          <div className="flex items-center">
-                            <input
-                              id="yes"
-                              type="radio"
-                              value="yes"
-                              className="w-4 h-4 text-purple-600 focus:ring-purple-500 bg-gray-600 border-gray-500"
-                              {...register('interview')}
-                            />
-                            <label htmlFor="yes" className="ml-2 text-sm text-gray-300">Yes</label>
-                          </div>
-                          <div className="flex items-center">
-                            <input
-                              id="no"
-                              type="radio"
-                              value="no"
-                              className="w-4 h-4 text-purple-600 focus:ring-purple-500 bg-gray-600 border-gray-500"
-                              {...register('interview')}
-                            />
-                            <label htmlFor="no" className="ml-2 text-sm text-gray-300">No</label>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+  <h2 className="text-xl font-semibold mb-4">Role Information</h2>
+  <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
+    <div>
+      <label className="block text-sm text-gray-400 mb-1">
+        Are you an Interviewer or Interviewee?
+      </label>
+      <div className="flex items-center space-x-6 bg-gray-700 border border-gray-600 rounded-md p-2.5">
+        <div className="flex items-center">
+          <input
+            id="interviewer"
+            type="radio"
+            value="Interviewer"
+            className="w-4 h-4 text-purple-600 focus:ring-purple-500 bg-gray-600 border-gray-500"
+            {...register('role')}
+          />
+          <label htmlFor="interviewer" className="ml-2 text-sm text-gray-300">
+            Interviewer
+          </label>
+        </div>
+        <div className="flex items-center">
+          <input
+            id="interviewee"
+            type="radio"
+            value="Interviewee"
+            className="w-4 h-4 text-purple-600 focus:ring-purple-500 bg-gray-600 border-gray-500"
+            {...register('role')}
+          />
+          <label htmlFor="interviewee" className="ml-2 text-sm text-gray-300">
+            Interviewee
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
                   
                   {/* Resume Upload Section */}
                   <div className="bg-gray-800 rounded-lg p-6">
@@ -346,87 +320,7 @@ export default function ProfilePage() {
               )}
               
               {/* Skills Section */}
-              {activeTab === 'skills' && (
-                <div className="bg-gray-800 rounded-lg p-6 shadow-lg border border-gray-700 transform transition-all hover:shadow-blue-900/20 hover:shadow-xl">
-                  <h2 className="text-2xl font-bold mb-6 text-blue-400">Technical Skills</h2>
-                  
-                  <div className="space-y-6">
-                    <div>
-                      <label className="text-gray-300 font-medium block mb-2">Add Skills</label>
-                      <div className="relative">
-                        <input
-                          type="text"
-                          value={searchTerm}
-                          onChange={(e) => setSearchTerm(e.target.value)}
-                          placeholder="Search skills..."
-                          className="w-full bg-gray-700 border border-gray-600 text-white p-3 pl-4 pr-10 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                        />
-                        <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                          <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                            <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
-                          </svg>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    {searchTerm && (
-                      <div className="bg-gray-700 rounded-md p-2 max-h-40 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600">
-                        {filteredTags.length > 0 ? (
-                          filteredTags.map((tag) => (
-                            <button
-                              key={tag.value}
-                              type="button"
-                              onClick={() => handleSkillAdd(tag.value)}
-                              className="w-full text-left px-3 py-2 hover:bg-gray-600 rounded-md transition-colors text-gray-200"
-                            >
-                              {tag.label}
-                            </button>
-                          ))
-                        ) : (
-                          <p className="text-gray-400 p-2">No matching skills found</p>
-                        )}
-                      </div>
-                    )}
-                    
-                    <div>
-                      <label className="text-gray-300 font-medium block mb-2">Selected Skills</label>
-                      
-                      <div className="bg-gray-700 border border-gray-600 rounded-md p-4 min-h-24">
-                        {watchedSkills.length > 0 ? (
-                          <div className="flex flex-wrap gap-2">
-                            {watchedSkills.map((skill, index) => (
-                              <span
-                                key={skill}
-                                className={`${skillColors[index % skillColors.length]} text-white px-3 py-1.5 text-sm flex items-center gap-1 rounded-full shadow-md hover:shadow-lg transition-all duration-300`}
-                              >
-                                {skill}
-                                <button
-                                  type="button"
-                                  onClick={() => handleRemoveSkill(skill)}
-                                  className="ml-1 hover:text-red-300 transition-colors focus:outline-none"
-                                  aria-label={`Remove ${skill}`}
-                                >
-                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                                  </svg>
-                                </button>
-                              </span>
-                            ))}
-                          </div>
-                        ) : (
-                          <p className="text-gray-400 text-center py-4">No skills selected yet</p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                  <button
-                type="submit"
-                className="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-3 px-4 rounded-md mt-6"
-              >
-                Save Skills
-              </button>
-                </div>
-              )}
+             
               
             
             </form>
@@ -542,4 +436,13 @@ export default function ProfilePage() {
       </div>
     </div>
   );
+}
+
+function setError(error: string) {
+  throw new Error('Function not implemented.');
+}
+
+
+function setSuccess(undefined: undefined) {
+  throw new Error('Function not implemented.');
 }
