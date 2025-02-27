@@ -8,54 +8,62 @@ datasource db {
 }
 
 model User {
-  id           String   @id @map("_id")
+  id           String       @id @map("_id")
   name         String
-  email        String   @unique
-  Gender       gender
+  email        String       @unique
+  Gender       gender?
   description  String?
+  dob          String?
   ProfileImage String?
-  Skills       String[]
-  Type         String   @default("Interviewee")
+ languages     String[]
+ tools         String[]
+ frameworks     String[]
+  Type         String       @default("Interviewee")
   Experience   Experience[]
   Linkedin     String?
   Github       String?
-  AvgRating    Int
-  createdAt    DateTime @default(now())
+  AvgRating    Int     @default(0)
+  createdAt    DateTime     @default(now())
 
-  mockInterview MockInterview[]
-  timeSlots     TimeSlot[]
+  updatedAt DateTime   @default(now())
+  timeSlots TimeSlot[]
+
+  mockInterviewer MockInterview[] @relation("Interviewer")
+  mockInterviewee MockInterview[] @relation("Interviewee")
+  MockInterview   MockInterview[]
 }
 
 enum gender {
   male
   female
 }
- model Experience{
-  id            String   @id  @map("_id") @db.ObjectId
-  userId        String   @unique
-  CompanyName   String?
-  Role          String
-  Description   String?
-  Duration      String?
 
-   User    User         @relation(fields: [userId], references: [id])
+model Experience {
+  id          String  @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String  @unique
+  CompanyName String?
+  Role        String?
+  Description String?
+  Duration    String?
 
- }
-
- 
+  User User @relation(fields: [userId], references: [id])
+}
 
 model MockInterview {
-  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  id            String       @id @default(auto()) @map("_id") @db.ObjectId
   userId        String
+  interviewerId String
+  intervieweeId String
   MockResponse  Json[]
   jobPosition   String
   jobDesc       String
   jobexperience String
   Roles         String[]
-  createdAt     DateTime @default(now())
-
-  answers UserAnswer[]
-  User    User         @relation(fields: [userId], references: [id])
+  createdAt     DateTime     @default(now())
+  interviewer   User         @relation("Interviewer", fields: [interviewerId], references: [id])
+  interviewee   User         @relation("Interviewee", fields: [intervieweeId], references: [id])
+  answers       UserAnswer[]
+  User          User         @relation(fields: [userId], references: [id])
 }
 
 model UserAnswer {
@@ -68,6 +76,8 @@ model UserAnswer {
   Intervieweerating   Int
   InterviewerFeedback String?
   InterviewerRating   Int?
+  interviewerId       String
+  intervieweeId       String
 
   correctAnswer   String
   mockInterviewId String         @db.ObjectId

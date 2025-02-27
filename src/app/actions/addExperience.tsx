@@ -5,19 +5,20 @@ import { db } from "@/lib/db";
 import * as z from "zod";
 
 const ExperienceSchema = z.object({
-    company: z.string().min(1, "Company name is required"),
-    role: z.string().min(1, "Role is required"),
-    duration: z.string().min(1, "Duration is required"),
-    description: z.string().optional()
-  })
-
+  company: z.string().min(1, "Company name is required"),
+  role: z.string().min(1, "Role is required"),
+  duration: z.string().min(1, "Duration is required"),
+  description: z.string().optional(),
+});
 
 // Schema for the entire form
 const SettingsSchema = z.object({
-  experiences: z.array(ExperienceSchema)
+  experiences: z.array(ExperienceSchema),
 });
 
-export const addExperiences = async (values: z.infer<typeof SettingsSchema>) => {
+export const addExperiences = async (
+  values: z.infer<typeof SettingsSchema>
+) => {
   try {
     // Validate input data against the schema
     const validatedData = SettingsSchema.parse(values);
@@ -27,30 +28,24 @@ export const addExperiences = async (values: z.infer<typeof SettingsSchema>) => 
     if (!user) {
       return { error: "Unauthorized" };
     }
+    console.log(user);
 
-    // Get the user record from the database
-    const dbUser = await findUserbyId(user.id);
-    if (!dbUser) {
-      return { error: "User not found" };
-    }
-
-
-
-    
     const experiences = await db.$transaction(
-      validatedData.experiences.map((experience) => 
+      validatedData.experiences.map((experience) =>
         db.experience.create({
           data: {
+         
             CompanyName: experience.company,
             Duration: experience.duration,
             Role: experience.role,
             Description: experience.description || "",
-            userId: dbUser.id 
-          }
+            userId: user.id,
+          },
         })
       )
     );
 
+    console.log("experiences uploaded successfully");
     return { success: "Experiences updated successfully" };
   } catch (error) {
     console.error("Error updating experiences:", error);
@@ -60,6 +55,3 @@ export const addExperiences = async (values: z.infer<typeof SettingsSchema>) => 
     return { error: "Something went wrong! Please try again." };
   }
 };
-
-
-
